@@ -3,73 +3,127 @@ public class PalindromeCheckerApp {
 
         // -------------------------------------------------------
         // Step 1: Declare a hardcoded String literal
-        // The String "racecar" is stored in the constant pool.
-        // String is immutable - it cannot be changed once created.
         // -------------------------------------------------------
-        String original = "racecar";
+        String original = "level";
 
-        // -------------------------------------------------------
-        // Step 2: Reverse the string manually using a for loop
-        //
-        // Loop starts at the last index (length - 1) and
-        // iterates backwards down to index 0.
-        //
-        // charAt(i) retrieves the character at position i.
-        //
-        // String Concatenation (+):
-        // Each iteration creates a NEW String object in memory
-        // because String is immutable. The variable 'reversed'
-        // is reassigned to each newly created String.
-        //
-        // Memory Trace Example for "abc":
-        //   Iteration 1: reversed = "" + 'c'  → new String "c"
-        //   Iteration 2: reversed = "c" + 'b' → new String "cb"
-        //   Iteration 3: reversed = "cb" + 'a'→ new String "cba"
-        // -------------------------------------------------------
-        String reversed = "";   // Start with an empty String literal
-
-        for (int i = original.length() - 1; i >= 0; i--) {
-            // charAt(i) extracts the character at index i
-            // + operator concatenates it to the growing reversed string
-            // Each + creates a new String object (String Immutability)
-            reversed = reversed + original.charAt(i);
-        }
-
-        // -------------------------------------------------------
-        // Step 3: Compare using equals()
-        //
-        // equals() compares the CONTENT of two String objects.
-        // Using == would compare memory references (object address),
-        // not the actual characters — which would be incorrect here.
-        // -------------------------------------------------------
         System.out.println("=====================================================");
-        System.out.println("   Palindrome Checker Management System - UC3");
-        System.out.println("   Method: String Reverse Using for Loop");
+        System.out.println("   Palindrome Checker Management System - UC4");
+        System.out.println("   Method: Character Array + Two-Pointer Technique");
         System.out.println("=====================================================");
         System.out.println();
         System.out.println("Input String  : " + original);
-        System.out.println("Reversed      : " + reversed);
         System.out.println();
 
         // -------------------------------------------------------
-        // Step 4: Conditional check and display result
+        // Step 2: Convert String to char[]
+        //
+        // toCharArray() breaks the String into individual
+        // characters stored at index positions 0 to length-1.
+        //
+        // Example: "level" → ['l', 'e', 'v', 'e', 'l']
+        //           Index  →   0    1    2    3    4
+        //
+        // char[] is a primitive array — lightweight, no object
+        // overhead per element, ideal for index-based access.
         // -------------------------------------------------------
-        if (original.equals(reversed)) {
+        char[] chars = original.toCharArray();
+
+        // Display the char[] contents and indices for clarity
+        System.out.print("char[] Contents : [ ");
+        for (int i = 0; i < chars.length; i++) {
+            System.out.print("'" + chars[i] + "'");
+            if (i < chars.length - 1) System.out.print(", ");
+        }
+        System.out.println(" ]");
+
+        System.out.print("char[] Indices  : [ ");
+        for (int i = 0; i < chars.length; i++) {
+            System.out.print(" " + i + " ");
+            if (i < chars.length - 1) System.out.print(", ");
+        }
+        System.out.println(" ]");
+        System.out.println();
+
+        // -------------------------------------------------------
+        // Step 3: Initialize Two Pointers
+        //
+        // left  → starts at index 0 (first character)
+        // right → starts at index length-1 (last character)
+        //
+        // Visual for "level":
+        //   left                    right
+        //    ↓                        ↓
+        //  [ 'l',  'e',  'v',  'e',  'l' ]
+        //     0     1     2     3     4
+        // -------------------------------------------------------
+        int left  = 0;
+        int right = chars.length - 1;
+
+        boolean isPalindrome = true;  // Assume true until mismatch found
+
+        System.out.println("--- Two-Pointer Comparison Trace ---");
+
+        // -------------------------------------------------------
+        // Step 4: Two-Pointer while loop
+        //
+        // Continue while left pointer is strictly less than right.
+        // When left >= right, all necessary pairs have been checked.
+        // The middle character (odd-length strings) is never compared
+        // against itself — it doesn't affect palindrome validity.
+        // -------------------------------------------------------
+        while (left < right) {
+
+            // Array Indexing: access characters at current pointer positions
+            char leftChar  = chars[left];
+            char rightChar = chars[right];
+
+            System.out.println("  Comparing index [" + left + "] = '" + leftChar +
+                    "'  <-->  index [" + right + "] = '" + rightChar + "'");
+
+            // -------------------------------------------------------
+            // Step 5: Compare characters at both pointers
+            //
+            // If they do NOT match → not a palindrome.
+            // Early exit: no need to check remaining characters.
+            // This is more efficient than always checking all pairs.
+            // -------------------------------------------------------
+            if (leftChar != rightChar) {
+                isPalindrome = false;
+                System.out.println("  ✗ Mismatch found! Exiting early.");
+                break;
+            } else {
+                System.out.println("  ✓ Match!");
+            }
+
+            // -------------------------------------------------------
+            // Step 6: Move pointers inward
+            // left moves right (+1), right moves left (-1)
+            // -------------------------------------------------------
+            left++;
+            right--;
+        }
+
+        // -------------------------------------------------------
+        // Step 7: Display final result
+        // -------------------------------------------------------
+        System.out.println();
+        System.out.println("--- Result ---");
+        if (isPalindrome) {
             System.out.println("Result: \"" + original + "\" IS a Palindrome.");
         } else {
             System.out.println("Result: \"" + original + "\" is NOT a Palindrome.");
         }
 
         // -------------------------------------------------------
-        // Note on String Immutability & Performance:
-        // Using + inside a loop is inefficient for large strings
-        // because each concatenation allocates a new String object.
-        // For n characters, this creates O(n) temporary objects.
-        // StringBuilder (UC4) avoids this by mutating a single buffer.
+        // Time Complexity Summary
         // -------------------------------------------------------
         System.out.println();
-        System.out.println("[ Note: Each + in the loop created a new String object ]");
-        System.out.println("[ Total new String objects created: " + original.length() + " ]");
+        System.out.println("--- Complexity Analysis ---");
+        System.out.println("String Length      : " + original.length());
+        System.out.println("Comparisons Made   : " + (original.length() / 2) + "  (at most n/2)");
+        System.out.println("Extra Objects Used : None  (in-place char[] access)");
+        System.out.println("Time Complexity    : O(n)");
+        System.out.println("Space Complexity   : O(n)  (for the char[] copy)");
         System.out.println();
         System.out.println("=====================================================");
         System.out.println("   Program exits successfully.");
