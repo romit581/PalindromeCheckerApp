@@ -269,6 +269,7 @@ public class PalindromeCheckerApp {
         java.util.List<Map.Entry<String, Long>> sorted = new java.util.ArrayList<>(results.entrySet());
         sorted.sort(java.util.Map.Entry.comparingByValue());
 
+        
         // -------------------------------------------------------
         // Display Results Table
         // -------------------------------------------------------
