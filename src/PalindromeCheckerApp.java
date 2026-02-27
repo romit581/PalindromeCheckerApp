@@ -167,32 +167,5 @@ public class PalindromeCheckerApp {
         // Test Case 6: Numbers
         checkAndDisplay("12321");
 
-        // -------------------------------------------------------
-        // Summary
-        // -------------------------------------------------------
-        System.out.println("--- Key Concept Summary ---");
-        System.out.println();
-        System.out.printf("  %-26s | %s%n", "Concept", "Detail");
-        System.out.println("  ---------------------------|------------------------------------------------");
-        System.out.printf("  %-26s | %s%n", "String Preprocessing",
-                "Transforms raw input into a normalized comparable form");
-        System.out.printf("  %-26s | %s%n", "toLowerCase()",
-                "Case-insensitive comparison; returns new String (immutable)");
-        System.out.printf("  %-26s | %s%n", "replaceAll(regex, \"\")",
-                "Regex engine removes all characters not in [a-z0-9]");
-        System.out.printf("  %-26s | %s%n", "Regular Expression [^a-z0-9]",
-                "Negated character class matching spaces, punctuation, symbols");
-        System.out.printf("  %-26s | %s%n", "Two-Pointer (post-clean)",
-                "Efficient O(n) palindrome check on the cleaned string");
-        System.out.printf("  %-26s | %s%n", "String Immutability",
-                "Each preprocessing step creates a new String object");
-        System.out.printf("  %-26s | %s%n", "Time Complexity",
-                "O(n) preprocessing + O(n) check = O(n) total");
-        System.out.printf("  %-26s | %s%n", "Space Complexity",
-                "O(n) — cleaned string stored as a new String object");
-        System.out.println();
-        System.out.println("=====================================================");
-        System.out.println("   Program exits successfully.");
-        System.out.println("=====================================================");
-    }
+        
 }
