@@ -1,162 +1,50 @@
-class PalindromeResult {
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Stack;
+
+public class PalindromeCheckerApp {
 
     // -------------------------------------------------------
-    // Private fields — Encapsulation
-    // These cannot be accessed directly from outside the class.
-    // External code must use the provided getter methods.
+    // Benchmark Configuration Constants
     // -------------------------------------------------------
-    private final String rawInput;       // Original uncleaned input
-    private final String cleanedInput;   // Normalized/preprocessed input
-    private final boolean isPalindrome;  // Result of palindrome check
-    private final String strategy;       // Strategy used for checking
+    static final int    ITERATIONS  = 100_000;   // Runs per algorithm
+    static final int    WARMUP_RUNS = 10_000;    // JVM warm-up passes
+    static final String TEST_INPUT  =            // Long palindrome for stress test
+            "amanaplanacanalpanama";
 
-
-    PalindromeResult(String rawInput, String cleanedInput,
-                     boolean isPalindrome, String strategy) {
-        this.rawInput      = rawInput;
-        this.cleanedInput  = cleanedInput;
-        this.isPalindrome  = isPalindrome;
-        this.strategy      = strategy;
-    }
+    // =====================================================
+    // ALGORITHM IMPLEMENTATIONS
+    // Each method is self-contained, normalized input only.
+    // =====================================================
 
     // -------------------------------------------------------
-    // Public Getter Methods — Controlled Access (Encapsulation)
-    // These are the ONLY way to read the private field values.
-    // No setters are provided — the result is immutable.
+    // Algorithm 1: String Concatenation Loop (UC3)
+    // Builds reversed string via + inside a for loop.
+    // Creates new String object each iteration — inefficient.
+    // Time: O(n²) due to repeated String object creation
     // -------------------------------------------------------
-
-    /** @return the original raw input string */
-    public String getRawInput()      { return rawInput; }
-
-    /** @return the normalized/cleaned input string */
-    public String getCleanedInput()  { return cleanedInput; }
-
-    /** @return true if the input is a palindrome */
-    public boolean isPalindrome()    { return isPalindrome; }
-
-    /** @return the name of the strategy used */
-    public String getStrategy()      { return strategy; }
-
-
-    @Override
-    public String toString() {
-        return String.format(
-                "  Raw Input    : \"%s\"%n" +
-                        "  Cleaned      : \"%s\"%n" +
-                        "  Strategy     : %s%n" +
-                        "  Is Palindrome: %s",
-                rawInput, cleanedInput, strategy,
-                isPalindrome ? "✓ YES" : "✗ NO"
-        );
-    }
-}
-
-
-
-class PalindromeChecker {
-
-    // -------------------------------------------------------
-    // Private field — tracks how many checks have been run.
-    // Demonstrates encapsulated state within the service.
-    // -------------------------------------------------------
-    private int checkCount;
-
-
-    PalindromeChecker() {
-        this.checkCount = 0;
-    }
-
-    // -------------------------------------------------------
-    // Public API Method: checkPalindrome(String)
-    //
-    // Primary entry point for palindrome validation.
-    // Orchestrates: normalize → check → package result.
-    //
-    // The caller only needs to pass a raw string.
-    // All internal complexity is hidden (Abstraction).
-    //
-    // Uses the Two-Pointer strategy internally.
-    // -------------------------------------------------------
-     PalindromeResult checkPalindrome(String raw) {
-        checkCount++;
-        String cleaned = normalize(raw);
-        boolean result = twoPointerCheck(cleaned);
-        return new PalindromeResult(raw, cleaned, result, "Two-Pointer");
-    }
-
-    // -------------------------------------------------------
-    // Overloaded Method: checkPalindrome(String, String)
-    //
-    // Method Overloading — same method name, different params.
-    // Allows the caller to specify which strategy to use.
-    //
-    // Supported strategies:
-    //   "twopointer" → Two-pointer char comparison (default)
-    //   "stack"      → Stack-based reversal (LIFO)
-    //   "recursive"  → Recursive start/end comparison
-    // -------------------------------------------------------
-
-    public PalindromeResult checkPalindrome(String raw, String strategy) {
-        checkCount++;
-        String cleaned = normalize(raw);
-        boolean result = false;           // Default value; overwritten by switch
-        String strategyLabel = "Two-Pointer"; // Default; overwritten by switch
-
-        switch (strategy.toLowerCase()) {
-            case "stack":
-                result = stackCheck(cleaned);
-                strategyLabel = "Stack (LIFO)";
-                break;
-            case "recursive":
-                result = recursiveCheck(cleaned, 0, cleaned.length() - 1);
-                strategyLabel = "Recursive";
-                break;
-            default:
-                result = twoPointerCheck(cleaned);
-                strategyLabel = "Two-Pointer";
+    static boolean stringConcatReverse(String s) {
+        String reversed = "";
+        for (int i = s.length() - 1; i >= 0; i--) {
+            reversed = reversed + s.charAt(i);
         }
-
-        return new PalindromeResult(raw, cleaned, result, strategyLabel);
+        return s.equals(reversed);
     }
 
     // -------------------------------------------------------
-    // Public Getter: getCheckCount()
-    // Provides READ-ONLY access to the private checkCount field.
+    // Algorithm 2: char[] Two-Pointer (UC4)
+    // Converts to char[], compares from both ends inward.
+    // No extra object creation per comparison step.
+    // Time: O(n), Space: O(n) for the char[] copy
     // -------------------------------------------------------
-    /**
-     * Returns the total number of palindrome checks performed.
-     * @return check count
-     */
-    public int getCheckCount() { return checkCount; }
-
-    // =====================================================
-    // PRIVATE METHODS — Internal Implementation Details
-    // These are hidden from the outside world (Encapsulation).
-    // Callers interact only with the public checkPalindrome() API.
-    // =====================================================
-
-    // -------------------------------------------------------
-    // Private Method: normalize(String)
-    //
-    // Preprocessing pipeline (from UC10):
-    //   Step 1: toLowerCase() — remove case differences
-    //   Step 2: replaceAll([^a-z0-9], "") — strip non-alphanumeric
-    // -------------------------------------------------------
-    private String normalize(String raw) {
-        return raw.toLowerCase().replaceAll("[^a-z0-9]", "");
-    }
-
-    // -------------------------------------------------------
-    // Private Method: twoPointerCheck(String)
-    //
-    // Two-pointer technique (from UC4):
-    // Compare characters from both ends moving inward.
-    // -------------------------------------------------------
-    private boolean twoPointerCheck(String s) {
+    static boolean twoPointer(String s) {
+        char[] chars = s.toCharArray();
         int left  = 0;
-        int right = s.length() - 1;
+        int right = chars.length - 1;
         while (left < right) {
-            if (s.charAt(left) != s.charAt(right)) return false;
+            if (chars[left] != chars[right]) return false;
             left++;
             right--;
         }
@@ -164,123 +52,249 @@ class PalindromeChecker {
     }
 
     // -------------------------------------------------------
-    // Private Method: stackCheck(String)
-    //
-    // Stack-based reversal (from UC5):
-    // Push all chars, pop to reverse, compare with original.
+    // Algorithm 3: Stack-Based Reversal (UC5)
+    // Pushes all chars, pops to reverse, compares strings.
+    // Stack overhead: object boxing char → Character per push.
+    // Time: O(n), Space: O(n)
     // -------------------------------------------------------
-    private boolean stackCheck(String s) {
-        java.util.Stack<Character> stack = new java.util.Stack<>();
+    static boolean stackReversal(String s) {
+        Stack<Character> stack = new Stack<>();
         for (char c : s.toCharArray()) stack.push(c);
-
         StringBuilder reversed = new StringBuilder();
         while (!stack.isEmpty()) reversed.append(stack.pop());
-
         return s.equals(reversed.toString());
     }
 
     // -------------------------------------------------------
-    // Private Method: recursiveCheck(String, int, int)
-    //
-    // Recursive comparison (from UC9):
-    // Base condition: start >= end → true
-    // Recursive case: compare ends, recurse inward.
+    // Algorithm 4: Queue + Stack Comparison (UC6)
+    // Loads into both Queue and Stack, dequeues vs pops.
+    // Two data structures: 2× memory allocation overhead.
+    // Time: O(n), Space: O(2n)
     // -------------------------------------------------------
-    private boolean recursiveCheck(String s, int start, int end) {
+    static boolean queueStack(String s) {
+        java.util.Queue<Character> queue = new java.util.LinkedList<>();
+        Stack<Character> stack = new Stack<>();
+        for (char c : s.toCharArray()) {
+            queue.offer(c);
+            stack.push(c);
+        }
+        while (!queue.isEmpty()) {
+            if (!queue.poll().equals(stack.pop())) return false;
+        }
+        return true;
+    }
+
+    // -------------------------------------------------------
+    // Algorithm 5: Deque Front/Rear (UC7)
+    // Single Deque, pollFirst + pollLast simultaneously.
+    // One structure vs two in UC6, fewer allocations.
+    // Time: O(n), Space: O(n)
+    // -------------------------------------------------------
+    static boolean dequeCheck(String s) {
+        Deque<Character> deque = new ArrayDeque<>();
+        for (char c : s.toCharArray()) deque.offerLast(c);
+        while (deque.size() > 1) {
+            if (deque.pollFirst() != deque.pollLast()) return false;
+        }
+        return true;
+    }
+
+    // -------------------------------------------------------
+    // Algorithm 6: Linked List Simulated (UC8)
+    // Simplified: finds mid via fast/slow pointer on char[],
+    // reverses second half, compares.
+    // Time: O(n), Space: O(n) for char[] array
+    // -------------------------------------------------------
+    static boolean linkedListStyle(String s) {
+        if (s.isEmpty()) return true;
+        char[] arr = s.toCharArray();
+        int slow = 0, fast = 0;
+        // Fast/slow pointer to find midpoint
+        while (fast < arr.length && fast + 1 < arr.length) {
+            slow++;
+            fast += 2;
+        }
+        // Reverse second half in-place
+        int left = slow, right = arr.length - 1;
+        while (left < right) {
+            char tmp  = arr[left];
+            arr[left] = arr[right];
+            arr[right] = tmp;
+            left++;
+            right--;
+        }
+        // Compare first half with reversed second half
+        for (int i = 0; i < s.length() / 2; i++) {
+            if (arr[i] != arr[s.length() - 1 - i]) return false;
+        }
+        return true;
+    }
+
+    // -------------------------------------------------------
+    // Algorithm 7: Recursive (UC9)
+    // Calls itself inward, uses the JVM call stack.
+    // Stack frame creation overhead per recursive call.
+    // Time: O(n), Space: O(n) call stack depth
+    // -------------------------------------------------------
+    static boolean recursive(String s, int start, int end) {
         if (start >= end) return true;
         if (s.charAt(start) != s.charAt(end)) return false;
-        return recursiveCheck(s, start + 1, end - 1);
+        return recursive(s, start + 1, end - 1);
     }
-}
+
+    // =====================================================
+    // BENCHMARKING ENGINE
+    // =====================================================
 
 
-public class PalindromeCheckerApp {
+    interface Algorithm {
+        boolean run(String input);
+    }
+
+    static long benchmark(String name, Algorithm algo, String input) {
+
+        // --- Warm-up phase (not timed) ---
+        for (int i = 0; i < WARMUP_RUNS; i++) {
+            algo.run(input);
+        }
+
+        // --- Timed phase ---
+        long start = System.nanoTime();              // Capture start timestamp
+        for (int i = 0; i < ITERATIONS; i++) {
+            algo.run(input);
+        }
+        long end     = System.nanoTime();            // Capture end timestamp
+        long total   = end - start;                  // Total elapsed nanoseconds
+        long average = total / ITERATIONS;           // Average per call
+
+        return average;
+    }
+
+
+    static String formatTime(long ns) {
+        if (ns < 1_000) {
+            return ns + " ns";
+        } else if (ns < 1_000_000) {
+            return String.format("%.2f µs", ns / 1_000.0);
+        } else {
+            return String.format("%.2f ms", ns / 1_000_000.0);
+        }
+    }
+
+    static String bar(long value, long max, int width) {
+        int filled = (int) Math.round(((double) value / max) * width);
+        return "█".repeat(Math.max(1, filled));
+    }
+
 
     public static void main(String[] args) {
 
         System.out.println("=====================================================");
-        System.out.println("   Palindrome Checker Management System - UC11");
-        System.out.println("   Method: Object-Oriented Palindrome Service");
+        System.out.println("   Palindrome Checker Management System - UC13");
+        System.out.println("   Performance Comparison: Algorithm Benchmarking");
         System.out.println("=====================================================");
         System.out.println();
 
         // -------------------------------------------------------
-        // OOP in Action: Instantiate the Service Class
-        //
-        // An OBJECT of PalindromeChecker is created.
-        // The caller does not know about private normalize(),
-        // twoPointerCheck(), stackCheck(), or recursiveCheck().
-        // This is Abstraction + Encapsulation working together.
+        // Benchmark Configuration Display
         // -------------------------------------------------------
-        System.out.println("--- OOP Class Structure ---");
+        System.out.println("--- Benchmark Configuration ---");
         System.out.println();
-        System.out.printf("  %-30s | %s%n", "Class", "Responsibility (SRP)");
-        System.out.println("  -------------------------------|-------------------------------------------");
-        System.out.printf("  %-30s | %s%n", "PalindromeResult",
-                "Stores and exposes check outcome data");
-        System.out.printf("  %-30s | %s%n", "PalindromeChecker",
-                "Performs normalization and palindrome check");
-        System.out.printf("  %-30s | %s%n", "UseCase11PalindromeCheckerApp",
-                "Entry point; client of the service");
+        System.out.println("  Test Input   : \"" + TEST_INPUT + "\"");
+        System.out.println("  Input Length : " + TEST_INPUT.length() + " characters");
+        System.out.println("  Iterations   : " + String.format("%,d", ITERATIONS) + " runs per algorithm");
+        System.out.println("  Warm-up Runs : " + String.format("%,d", WARMUP_RUNS) + " (JIT compilation trigger)");
         System.out.println();
 
-        // Instantiate the service — client creates ONE checker object
-        PalindromeChecker checker = new PalindromeChecker();
-
         // -------------------------------------------------------
-        // Demo 1: Default strategy (Two-Pointer) via overload 1
-        // checkPalindrome(String)
+        // System.nanoTime() Explanation
         // -------------------------------------------------------
-        System.out.println("--- Demo 1: Default Strategy (Two-Pointer) ---");
+        System.out.println("--- Why System.nanoTime()? ---");
+        System.out.println();
+        System.out.println("  System.nanoTime()             → nanosecond precision timer");
+        System.out.println("  System.currentTimeMillis()    → millisecond precision (too coarse)");
+        System.out.println();
+        System.out.println("  Pattern used:");
+        System.out.println("    long start   = System.nanoTime();");
+        System.out.println("    // ... run algorithm ITERATIONS times ...");
+        System.out.println("    long end     = System.nanoTime();");
+        System.out.println("    long elapsed = end - start;           // total ns");
+        System.out.println("    long average = elapsed / ITERATIONS;  // avg ns per call");
         System.out.println();
 
-        String[] testInputs = {
-                "madam",
-                "RaceCar",
-                "A man a plan a canal Panama",
-                "Was it a car or a cat I saw?",
-                "Hello World",
-                "12321"
-        };
+        // -------------------------------------------------------
+        // Register Algorithms
+        // LinkedHashMap preserves insertion order for display
+        // -------------------------------------------------------
+        Map<String, Algorithm> algorithms = new LinkedHashMap<>();
+        algorithms.put("UC3  String Concat Loop ",  input -> stringConcatReverse(input));
+        algorithms.put("UC4  char[] Two-Pointer  ",  input -> twoPointer(input));
+        algorithms.put("UC5  Stack Reversal      ",  input -> stackReversal(input));
+        algorithms.put("UC6  Queue + Stack       ",  input -> queueStack(input));
+        algorithms.put("UC7  Deque Front/Rear    ",  input -> dequeCheck(input));
+        algorithms.put("UC8  Linked List Style   ",  input -> linkedListStyle(input));
+        algorithms.put("UC9  Recursive           ",  input -> recursive(input, 0, input.length() - 1));
 
-        for (String input : testInputs) {
-            PalindromeResult result = checker.checkPalindrome(input);
-            System.out.println(result.toString());
-            System.out.println();
+        // -------------------------------------------------------
+        // Run All Benchmarks
+        // -------------------------------------------------------
+        System.out.println("--- Running Benchmarks (please wait...) ---");
+        System.out.println();
+
+        Map<String, Long> results = new LinkedHashMap<>();
+        for (Map.Entry<String, Algorithm> entry : algorithms.entrySet()) {
+            System.out.print("  Benchmarking: " + entry.getKey().trim() + " ... ");
+            long avg = benchmark(entry.getKey(), entry.getValue(), TEST_INPUT);
+            results.put(entry.getKey(), avg);
+            System.out.println("done  (" + formatTime(avg) + " avg)");
+        }
+        System.out.println();
+
+        // -------------------------------------------------------
+        // Find fastest, slowest for relative comparison
+        // -------------------------------------------------------
+        long fastest = Long.MAX_VALUE;
+        long slowest = Long.MIN_VALUE;
+        String fastestName = "";
+        String slowestName = "";
+
+        for (Map.Entry<String, Long> e : results.entrySet()) {
+            if (e.getValue() < fastest) { fastest = e.getValue(); fastestName = e.getKey(); }
+            if (e.getValue() > slowest) { slowest = e.getValue(); slowestName = e.getKey(); }
         }
 
         // -------------------------------------------------------
-        // Demo 2: Explicit strategy selection via overload 2
-        // checkPalindrome(String, String)
-        // Demonstrates Method Overloading — same method name,
-        // different parameter lists, different behaviour.
+        // Sort results fastest → slowest
         // -------------------------------------------------------
-        System.out.println("--- Demo 2: Strategy Selection (Method Overloading) ---");
-        System.out.println();
-
-        String phrase = "Never odd or even";
-
-        System.out.println("  Testing: \"" + phrase + "\" with all strategies:");
-        System.out.println();
-
-        String[] strategies = {"twopointer", "stack", "recursive"};
-        for (String strat : strategies) {
-            PalindromeResult r = checker.checkPalindrome(phrase, strat);
-            System.out.printf("  %-16s → cleaned: \"%-20s\" → %s%n",
-                    r.getStrategy(),
-                    r.getCleanedInput(),
-                    r.isPalindrome() ? "✓ IS a Palindrome" : "✗ NOT a Palindrome");
-        }
-
-        // -------------------------------------------------------
-        // Demo 3: Encapsulated state — check count
-        // -------------------------------------------------------
-        System.out.println();
-        System.out.println("--- Demo 3: Encapsulated State ---");
-        System.out.println();
-        System.out.println("  checker.getCheckCount() = " + checker.getCheckCount());
-        System.out.println("  (Private field 'checkCount' accessed via public getter only)");
+        java.util.List<Map.Entry<String, Long>> sorted = new java.util.ArrayList<>(results.entrySet());
+        sorted.sort(java.util.Map.Entry.comparingByValue());
 
         
+        // -------------------------------------------------------
+        // Display Results Table
+        // -------------------------------------------------------
+        System.out.println("--- Performance Results (Fastest → Slowest) ---");
+        System.out.println();
+        System.out.printf("  %-6s | %-28s | %-12s | %-10s | %s%n",
+                "Rank", "Algorithm", "Avg Time", "vs Fastest", "Bar Chart");
+        System.out.println("  -------|------------------------------|--------------|------------|--------------------");
+
+        int rank = 1;
+        for (Map.Entry<String, Long> entry : sorted) {
+            long   time    = entry.getValue();
+            double vsBase  = (double) time / fastest;
+            String ratio   = (rank == 1) ? "baseline" : String.format("%.1fx slower", vsBase);
+            String barStr  = bar(time, slowest, 20);
+
+            System.out.printf("  %-6d | %-28s | %-12s | %-10s | %s%n",
+                    rank,
+                    entry.getKey().trim(),
+                    formatTime(time),
+                    ratio,
+                    barStr);
+            rank++;
+        }
+
+
     }
 }
