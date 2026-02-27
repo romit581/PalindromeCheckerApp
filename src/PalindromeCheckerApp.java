@@ -294,54 +294,6 @@ public class PalindromeCheckerApp {
             rank++;
         }
 
-        // -------------------------------------------------------
-        // Summary Observations
-        // -------------------------------------------------------
-        System.out.println();
-        System.out.println("--- Observations ---");
-        System.out.println();
-        System.out.println("  Fastest : " + fastestName.trim());
-        System.out.println("  Slowest : " + slowestName.trim());
-        System.out.println();
-        System.out.println("  Key Observations:");
-        System.out.println("  • UC3  String Concat Loop creates O(n²) temporary String");
-        System.out.println("    objects — worst memory performance.");
-        System.out.println("  • UC4  char[] Two-Pointer is typically fastest: no object");
-        System.out.println("    boxing, no extra allocation beyond the char[] copy.");
-        System.out.println("  • UC5  Stack and UC6 Queue+Stack incur boxing overhead");
-        System.out.println("    (char → Character) for every element stored.");
-        System.out.println("  • UC7  Deque is competitive but uses more method calls");
-        System.out.println("    than the direct index access of Two-Pointer.");
-        System.out.println("  • UC8  Linked List style uses in-place char[] swap —");
-        System.out.println("    efficient but adds swap and mid-finding passes.");
-        System.out.println("  • UC9  Recursion has call stack frame overhead per step,");
-        System.out.println("    making it slower than iterative approaches.");
-        System.out.println();
-
-        // -------------------------------------------------------
-        // Key Concept Summary
-        // -------------------------------------------------------
-        System.out.println("--- Key Concept Summary ---");
-        System.out.println();
-        System.out.printf("  %-26s | %s%n", "Concept", "Detail");
-        System.out.println("  ---------------------------|----------------------------------------------");
-        System.out.printf("  %-26s | %s%n", "System.nanoTime()",
-                "High-resolution JVM timer; measures elapsed ns precisely");
-        System.out.printf("  %-26s | %s%n", "Warm-up Phase",
-                "Triggers JIT compilation; removes interpreter overhead");
-        System.out.printf("  %-26s | %s%n", "Averaging over N runs",
-                "Smooths out JVM scheduling noise and GC pauses");
-        System.out.printf("  %-26s | %s%n", "Relative Comparison",
-                "'X times slower' more meaningful than raw nanoseconds");
-        System.out.printf("  %-26s | %s%n", "Boxing Overhead",
-                "char → Character per Stack/Queue element adds allocation cost");
-        System.out.printf("  %-26s | %s%n", "String Immutability Cost",
-                "UC3 creates n new String objects in the loop = O(n²) space");
-        System.out.printf("  %-26s | %s%n", "Algorithm Complexity",
-                "All except UC3 are O(n) time; UC3 is O(n²) due to + in loop");
-        System.out.println();
-        System.out.println("=====================================================");
-        System.out.println("   Program exits successfully.");
-        System.out.println("=====================================================");
+       
     }
 }
