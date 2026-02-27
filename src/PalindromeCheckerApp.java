@@ -281,31 +281,6 @@ public class PalindromeCheckerApp {
         System.out.println("  checker.getCheckCount() = " + checker.getCheckCount());
         System.out.println("  (Private field 'checkCount' accessed via public getter only)");
 
-        // -------------------------------------------------------
-        // OOP Concept Summary
-        // -------------------------------------------------------
-        System.out.println();
-        System.out.println("--- OOP Concept Summary ---");
-        System.out.println();
-        System.out.printf("  %-28s | %s%n", "Concept", "Where Applied");
-        System.out.println("  -----------------------------|------------------------------------------------");
-        System.out.printf("  %-28s | %s%n", "Encapsulation",
-                "private fields + public getters in both classes");
-        System.out.printf("  %-28s | %s%n", "Single Responsibility",
-                "Each class has exactly one clearly defined job");
-        System.out.printf("  %-28s | %s%n", "Abstraction",
-                "Caller uses checkPalindrome(); internals are hidden");
-        System.out.printf("  %-28s | %s%n", "Method Overloading",
-                "checkPalindrome(String) vs checkPalindrome(String, String)");
-        System.out.printf("  %-28s | %s%n", "Access Modifiers",
-                "private: fields & helpers | public: API methods");
-        System.out.printf("  %-28s | %s%n", "Object Instantiation",
-                "new PalindromeChecker() creates service object");
-        System.out.printf("  %-28s | %s%n", "toString() Override",
-                "PalindromeResult.toString() for readable output");
-        System.out.println();
-        System.out.println("=====================================================");
-        System.out.println("   Program exits successfully.");
-        System.out.println("=====================================================");
+        
     }
 }
