@@ -1,246 +1,185 @@
 
 public class PalindromeCheckerApp {
-    static class Node {
-        char data;   // Character stored in this node
-        Node next;   // Reference (pointer) to the next node
+    static boolean isPalindrome(String str, int start, int end) {
 
-        /**
-         * Constructor to create a new Node with given character data.
-         * next is null by default — no successor yet.
-         *
-         * @param data Character to store in this node
-         */
-        Node(char data) {
-            this.data = data;
-            this.next = null;
-        }
-    }
-
-    static Node buildLinkedList(String s) {
-        if (s == null || s.isEmpty()) return null;
-
-        Node head = new Node(s.charAt(0));   // First node (head)
-        Node current = head;
-
-        for (int i = 1; i < s.length(); i++) {
-            current.next = new Node(s.charAt(i));  // Link new node
-            current = current.next;                 // Advance pointer
+        // ---------------------------------------------------
+        // BASE CONDITION 1: Indices have crossed or met
+        //
+        // start > end → all pairs checked, none mismatched
+        //   → Occurs for odd-length strings after middle char
+        // start == end → single middle character remaining
+        //   → A single character is always a palindrome
+        //
+        // This is what STOPS the recursion from going infinite.
+        // Without this condition, calls would continue until
+        // a StackOverflowError is thrown.
+        // ---------------------------------------------------
+        if (start >= end) {
+            System.out.println("  [Base Condition] start(" + start +
+                    ") >= end(" + end + ") → return true  ← UNWIND begins");
+            return true;
         }
 
-        return head;
-    }
-
-    static void printList(Node head, String label) {
-        System.out.print("  " + label + ": ");
-        Node current = head;
-        while (current != null) {
-            System.out.print("[" + current.data + "]");
-            if (current.next != null) System.out.print(" → ");
-            current = current.next;
-        }
-        System.out.println(" → null");
-    }
-
-    static Node reverseList(Node head) {
-        Node prev    = null;
-        Node current = head;
-
-        while (current != null) {
-            Node next    = current.next;  // Save next node
-            current.next = prev;          // Reverse the link
-            prev         = current;       // Move prev forward
-            current      = next;          // Move current forward
+        // ---------------------------------------------------
+        // BASE CONDITION 2: Characters do NOT match
+        //
+        // If outermost characters differ → not a palindrome.
+        // Return false immediately (no deeper recursion needed).
+        // ---------------------------------------------------
+        if (str.charAt(start) != str.charAt(end)) {
+            System.out.println("  [Mismatch] '" + str.charAt(start) +
+                    "' != '" + str.charAt(end) +
+                    "' at start(" + start + ") end(" + end +
+                    ") → return false  ← UNWIND begins");
+            return false;
         }
 
-        return prev;  // prev is now the new head
+        // ---------------------------------------------------
+        // RECURSIVE CASE:
+        //
+        // Outer characters match → recurse inward.
+        // Reduce the problem: move start right, end left.
+        // The result of the inner call determines the result
+        // of this call (true only if ALL inner calls return true).
+        // ---------------------------------------------------
+        System.out.println("  [Recurse] '" + str.charAt(start) +
+                "' == '" + str.charAt(end) +
+                "' at indices [" + start + "] & [" + end +
+                "] → call isPalindrome(str, " + (start + 1) +
+                ", " + (end - 1) + ")");
+
+        return isPalindrome(str, start + 1, end - 1);
     }
     public static void main(String[] args) {
 
         // -------------------------------------------------------
-        // Step 1: Declare hardcoded String and build Linked List
+        // Step 1: Declare hardcoded String
         // -------------------------------------------------------
         String original = "racecar";
 
         System.out.println("=====================================================");
-        System.out.println("   Palindrome Checker Management System - UC8");
-        System.out.println("   Method: Singly Linked List + Fast/Slow Pointer");
+        System.out.println("   Palindrome Checker Management System - UC9");
+        System.out.println("   Method: Recursion + Call Stack");
         System.out.println("=====================================================");
         System.out.println();
         System.out.println("Input String : \"" + original + "\"");
-        System.out.println();
-
-        // Build the linked list from the input string
-        Node head = buildLinkedList(original);
-
-        System.out.println("--- Phase 1: Build Singly Linked List ---");
-        printList(head, "Full List");
-        System.out.println();
-        System.out.println("  Each character = one Node");
-        System.out.println("  Each Node.next  = reference to next Node");
-        System.out.println("  Last Node.next  = null (end of list)");
+        System.out.println("Length       : " + original.length());
+        System.out.println("Indices      : 0 to " + (original.length() - 1));
         System.out.println();
 
         // -------------------------------------------------------
-        // Step 2: Fast & Slow Pointer — Find the Middle
-        //
-        // slow pointer moves 1 step at a time.
-        // fast pointer moves 2 steps at a time.
-        //
-        // When fast reaches the end, slow is at the MIDDLE.
-        // This works because fast covers 2x the distance.
-        //
-        // Visual for "racecar" (length 7):
-        //   Start:   slow=[r] fast=[r]
-        //   Step 1:  slow=[a] fast=[c]
-        //   Step 2:  slow=[c] fast=[e]
-        //   Step 3:  slow=[e] fast=null (fast.next.next = null)
-        //   → slow is at the middle node 'e' (index 3)
-        //
-        // For even-length strings, slow lands just past center.
+        // Step 2: Display character index map for reference
         // -------------------------------------------------------
-        System.out.println("--- Phase 2: Fast & Slow Pointer (Find Middle) ---");
+        System.out.println("--- Character Index Map ---");
+        System.out.print("  Char  : ");
+        for (int i = 0; i < original.length(); i++) {
+            System.out.printf("  %c  ", original.charAt(i));
+        }
         System.out.println();
-        System.out.println("  slow moves 1 step  →  reaches middle");
-        System.out.println("  fast moves 2 steps →  reaches end");
+        System.out.print("  Index : ");
+        for (int i = 0; i < original.length(); i++) {
+            System.out.printf("  %d  ", i);
+        }
+        System.out.println();
         System.out.println();
 
-        Node slow = head;
-        Node fast = head;
-        int  stepCount = 0;
+        // -------------------------------------------------------
+        // Step 3: Initiate recursive palindrome check
+        //
+        // First call: start = 0 (first index), end = length - 1 (last index)
+        // Each subsequent call moves start forward and end backward.
+        // -------------------------------------------------------
+        System.out.println("--- Recursive Call Stack Trace ---");
+        System.out.println();
+        System.out.println("  DESCENDING (building the call stack):");
+        System.out.println();
 
-        System.out.printf("  %-8s | %-8s | %-8s%n", "Step", "slow", "fast");
-        System.out.println("  ---------|----------|----------");
-        System.out.printf("  %-8s | %-8s | %-8s%n", "Start",
-                "[" + slow.data + "]", "[" + fast.data + "]");
+        boolean result = isPalindrome(original, 0, original.length() - 1);
 
-        while (fast != null && fast.next != null) {
-            slow = slow.next;               // Advance slow by 1
-            fast = fast.next.next;          // Advance fast by 2
-            stepCount++;
-            System.out.printf("  %-8d | %-8s | %-8s%n",
-                    stepCount,
-                    "[" + slow.data + "]",
-                    fast != null ? "[" + fast.data + "]" : "null");
+        // -------------------------------------------------------
+        // Step 4: Visualise full Call Stack structure
+        // -------------------------------------------------------
+        System.out.println();
+        System.out.println("--- Call Stack Structure Visualised ---");
+        System.out.println();
+        System.out.println("  Each row = one stack frame pushed into memory");
+        System.out.println("  Frames unwind (pop) bottom-to-top after base condition");
+        System.out.println();
+
+        int frameWidth = 45;
+        String separator = "  +" + "-".repeat(frameWidth) + "+";
+
+        // Build and print call stack frames (top = deepest/base, bottom = first call)
+        String[] frames = new String[original.length() / 2 + 2];
+        int frameCount = 0;
+
+        // Base frame
+        int mid = original.length() / 2;
+        if (original.length() % 2 == 1) {
+            frames[frameCount++] = String.format(" BASE: isPalindrome(str, %d, %d) → start>=end → true", mid, mid);
+        } else {
+            frames[frameCount++] = String.format(" BASE: isPalindrome(str, %d, %d) → start>=end → true", mid, mid);
         }
 
-        System.out.println();
-        System.out.println("  → Middle node found: [" + slow.data + "]");
-        System.out.println();
-
-        // -------------------------------------------------------
-        // Step 3: In-Place Reversal of Second Half
-        //
-        // slow.next is the start of the second half.
-        // We reverse everything from slow.next onwards.
-        // The first half remains untouched.
-        //
-        // Before reversal:  [r]→[a]→[c]→[e]→[c]→[a]→[r]→null
-        //                                   ↑
-        //                                 (slow = middle)
-        // Second half start: slow.next = [c]→[a]→[r]→null
-        // After reversal:    secondHead = [r]→[a]→[c]→null
-        // -------------------------------------------------------
-        System.out.println("--- Phase 3: In-Place Reversal of Second Half ---");
-
-        Node secondHalfHead = slow.next;   // Start of second half
-
-        System.out.print("  Second half before reversal: ");
-        Node temp = secondHalfHead;
-        while (temp != null) {
-            System.out.print("[" + temp.data + "]");
-            if (temp.next != null) System.out.print(" → ");
-            temp = temp.next;
+        // Recursive frames (inner to outer)
+        for (int i = mid - 1; i >= 0; i--) {
+            int j = original.length() - 1 - i;
+            frames[frameCount++] = String.format(" CALL: isPalindrome(str, %d, %d) '%c'=='%c' → recurse inward",
+                    i, j,
+                    original.charAt(i),
+                    original.charAt(j));
         }
-        System.out.println(" → null");
 
-        // Reverse the second half in-place
-        Node reversedSecondHead = reverseList(secondHalfHead);
-
-        System.out.print("  Second half after  reversal: ");
-        temp = reversedSecondHead;
-        while (temp != null) {
-            System.out.print("[" + temp.data + "]");
-            if (temp.next != null) System.out.print(" → ");
-            temp = temp.next;
+        // Print top-to-bottom (top = innermost = base)
+        System.out.println("  TOP (most recent frame — base condition)");
+        System.out.println(separator);
+        for (int i = 0; i < frameCount; i++) {
+            System.out.printf("  |%-" + frameWidth + "s|%n", frames[i]);
+            System.out.println(separator);
         }
-        System.out.println(" → null");
-        System.out.println();
-        System.out.println("  No new nodes created — only next pointers rewired.");
-        System.out.println();
-
-        // -------------------------------------------------------
-        // Step 4: Compare First Half with Reversed Second Half
-        //
-        // Walk both halves simultaneously.
-        // first  → starts at head (original first half)
-        // second → starts at reversedSecondHead
-        //
-        // Stop when second half is exhausted.
-        // (For odd-length strings, the middle node is skipped
-        //  because it has no counterpart in the second half.)
-        // -------------------------------------------------------
-        System.out.println("--- Phase 4: Node-by-Node Comparison ---");
-        System.out.println();
-        System.out.printf("  %-6s | %-14s | %-14s | %s%n",
-                "Step", "First Half", "Second Half", "Match?");
-        System.out.println("  -------|----------------|----------------|--------");
-
-        Node first  = head;
-        Node second = reversedSecondHead;
-        boolean isPalindrome = true;
-        int compStep = 1;
-
-        while (second != null) {
-            System.out.printf("  %-6d | first  → '[%c]'  | second → '[%c]'  | %s%n",
-                    compStep,
-                    first.data,
-                    second.data,
-                    first.data == second.data ? "✓ YES" : "✗ NO  ← Mismatch!");
-
-            if (first.data != second.data) {
-                isPalindrome = false;
-                break;
-            }
-
-            // Node Traversal: advance both pointers via .next reference
-            first  = first.next;
-            second = second.next;
-            compStep++;
-        }
+        System.out.println("  BOTTOM (first call from main)");
 
         // -------------------------------------------------------
         // Step 5: Display final result
         // -------------------------------------------------------
         System.out.println();
         System.out.println("--- Result ---");
-        if (isPalindrome) {
+        if (result) {
             System.out.println("Result: \"" + original + "\" IS a Palindrome.");
-            System.out.println("  → All first-half nodes matched reversed second-half nodes.");
+            System.out.println("  → All recursive character comparisons returned true.");
+            System.out.println("  → Call stack unwound fully with no mismatches.");
         } else {
             System.out.println("Result: \"" + original + "\" is NOT a Palindrome.");
-            System.out.println("  → A node value mismatch was detected.");
+            System.out.println("  → A mismatch triggered false to propagate up the call stack.");
         }
 
         // -------------------------------------------------------
-        // Step 6: Concept Summary
+        // Step 6: Key Concept Summary
         // -------------------------------------------------------
         System.out.println();
         System.out.println("--- Key Concept Summary ---");
         System.out.println();
-        System.out.printf("  %-28s | %s%n", "Concept", "Details");
-        System.out.println("  -----------------------------|--------------------------------------------");
-        System.out.printf("  %-28s | %s%n", "Singly Linked List",
-                "Nodes connected via .next references");
-        System.out.printf("  %-28s | %s%n", "Node Traversal",
-                "current = current.next to move forward");
-        System.out.printf("  %-28s | %s%n", "Fast & Slow Pointer",
-                "fast moves 2x, slow moves 1x → finds middle");
-        System.out.printf("  %-28s | %s%n", "In-Place Reversal",
-                "Rewires .next pointers; no new nodes created");
-        System.out.printf("  %-28s | %s%n", "Time  Complexity",
-                "O(n) — three linear passes over the list");
-        System.out.printf("  %-28s | %s%n", "Space Complexity",
-                "O(1) — only pointer variables, no extra structures");
+        System.out.printf("  %-22s | %s%n", "Concept", "Explanation");
+        System.out.println("  -----------------------|-----------------------------------------------");
+        System.out.printf("  %-22s | %s%n", "Recursion",
+                "Method calls itself with smaller start/end range");
+        System.out.printf("  %-22s | %s%n", "Base Condition 1",
+                "start >= end → all pairs checked → return true");
+        System.out.printf("  %-22s | %s%n", "Base Condition 2",
+                "char mismatch → return false immediately");
+        System.out.printf("  %-22s | %s%n", "Recursive Case",
+                "chars match → isPalindrome(str, start+1, end-1)");
+        System.out.printf("  %-22s | %s%n", "Call Stack",
+                "Each call pushes a new frame; base pops them all");
+        System.out.printf("  %-22s | %s%n", "Stack Depth",
+                "n/2 frames maximum (one per character pair)");
+        System.out.printf("  %-22s | %s%n", "Time Complexity",
+                "O(n) — n/2 comparisons");
+        System.out.printf("  %-22s | %s%n", "Space Complexity",
+                "O(n) — n/2 stack frames held in memory");
+        System.out.println();
+        System.out.println("  Important: No loops, no arrays, no extra data structures.");
+        System.out.println("  The call stack itself IS the data structure.");
         System.out.println();
         System.out.println("=====================================================");
         System.out.println("   Program exits successfully.");
