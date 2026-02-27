@@ -339,31 +339,6 @@ public class PalindromeCheckerApp {
         System.out.printf("  strategy.check(\"%s\") → %b  (%s)%n",
                 testWord, strategy.check(testWord), strategy.getDataStructure());
 
-        // -------------------------------------------------------
-        // Key Concept Summary
-        // -------------------------------------------------------
-        System.out.println();
-        System.out.println("--- Key Concept Summary ---");
-        System.out.println();
-        System.out.printf("  %-24s | %s%n", "Concept", "How It Is Applied");
-        System.out.println("  -------------------------|------------------------------------------------------");
-        System.out.printf("  %-24s | %s%n", "Interface",
-                "PalindromeStrategy defines check(), getName(), getDataStructure()");
-        System.out.printf("  %-24s | %s%n", "Polymorphism",
-                "One interface reference holds any concrete strategy; JVM dispatches");
-        System.out.printf("  %-24s | %s%n", "Strategy Pattern",
-                "Algorithm family encapsulated per class; swapped via setStrategy()");
-        System.out.printf("  %-24s | %s%n", "Encapsulation",
-                "Each strategy hides its own internal data structure and logic");
-        System.out.printf("  %-24s | %s%n", "Open/Closed Principle",
-                "Add new algorithm = new class only; Context never modified");
-        System.out.printf("  %-24s | %s%n", "Dependency Injection",
-                "Strategy passed into Context via constructor or setStrategy()");
-        System.out.printf("  %-24s | %s%n", "Runtime Flexibility",
-                "Algorithm chosen dynamically; no if-else chains in the Context");
-        System.out.println();
-        System.out.println("=====================================================");
-        System.out.println("   Program exits successfully.");
-        System.out.println("=====================================================");
+        
     }
 }
