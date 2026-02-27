@@ -5,8 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="51bdae0f-bd3d-4f45-b713-a571dfce1d9a" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.ai/mcp/mcp.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/PalindromeCheckerApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/PalindromeCheckerApp.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,8 +24,25 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="romit581 &lt;rs0742@srmist.edu.in&gt;" />
+      </list>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "romit581"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/romit581/PalindromeCheckerApp.git",
+    "accountId": "dee54041-73e8-445f-8059-fad55d4197da"
+  }
+}]]></component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -48,7 +65,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "feature/UC9",
+    "git-widget-placeholder": "develop",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/Admin/Documents/B1P22_RA2411003010091/Palindrome",
@@ -96,10 +113,34 @@
       <workItem from="1771816335045" duration="1965000" />
       <workItem from="1772160744687" duration="777000" />
     </task>
+    <task id="LOCAL-00001" summary="UC9:Palindrome using Recursion">
+      <option name="closed" value="true" />
+      <created>1772162703184</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1772162703184</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="UC9:Palindrome using Recursion" />
+    <option name="LAST_COMMIT_MESSAGE" value="UC9:Palindrome using Recursion" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

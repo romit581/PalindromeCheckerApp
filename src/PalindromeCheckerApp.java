@@ -1,185 +1,195 @@
 
 public class PalindromeCheckerApp {
-    static boolean isPalindrome(String str, int start, int end) {
+    static String normalize(String raw) {
+        return raw.toLowerCase()            // Step 1: Case normalization
+                .replaceAll("[^a-z0-9]", ""); // Step 2: Strip non-alphanumeric
+    }
 
-        // ---------------------------------------------------
-        // BASE CONDITION 1: Indices have crossed or met
+    static boolean isPalindrome(String cleaned) {
+        int left  = 0;
+        int right = cleaned.length() - 1;
+
+        while (left < right) {
+            if (cleaned.charAt(left) != cleaned.charAt(right)) {
+                return false;
+            }
+            left++;
+            right--;
+        }
+        return true;
+    }
+
+    static void checkAndDisplay(String raw) {
+        System.out.println("  ┌─────────────────────────────────────────────────┐");
+        System.out.println("  │ Input   : \"" + raw + "\"");
+
+        // -------------------------------------------------------
+        // Preprocessing Step 1: toLowerCase()
         //
-        // start > end → all pairs checked, none mismatched
-        //   → Occurs for odd-length strings after middle char
-        // start == end → single middle character remaining
-        //   → A single character is always a palindrome
+        // Java's String.toLowerCase() converts every uppercase
+        // character to its lowercase equivalent using Unicode rules.
+        // A new String object is returned (String is immutable).
         //
-        // This is what STOPS the recursion from going infinite.
-        // Without this condition, calls would continue until
-        // a StackOverflowError is thrown.
-        // ---------------------------------------------------
-        if (start >= end) {
-            System.out.println("  [Base Condition] start(" + start +
-                    ") >= end(" + end + ") → return true  ← UNWIND begins");
-            return true;
+        // Example: "A Man A Plan" → "a man a plan"
+        // -------------------------------------------------------
+        String lowered = raw.toLowerCase();
+        System.out.println("  │ Step 1  : toLowerCase()         → \"" + lowered + "\"");
+
+        // -------------------------------------------------------
+        // Preprocessing Step 2: replaceAll(regex, replacement)
+        //
+        // Regular Expression: [^a-z0-9]
+        //   [ ]     → character class (match one of these)
+        //   ^       → negation inside [ ] (NOT any of these)
+        //   a-z     → any lowercase letter (a,b,c,...z)
+        //   0-9     → any digit (0,1,2,...9)
+        //   Result  → matches any char that is NOT a letter/digit
+        //
+        // replaceAll replaces EVERY match with "" (removes them).
+        // Java's regex engine scans the entire string in O(n).
+        //
+        // Example: "a man a plan" → "amanaplan"
+        // -------------------------------------------------------
+        String cleaned = lowered.replaceAll("[^a-z0-9]", "");
+        System.out.println("  │ Step 2  : replaceAll([^a-z0-9]) → \"" + cleaned + "\"");
+        System.out.println("  │");
+
+        // -------------------------------------------------------
+        // Two-Pointer Comparison Trace
+        // -------------------------------------------------------
+        System.out.print("  │ Indices : [");
+        for (int i = 0; i < cleaned.length(); i++) {
+            System.out.print(i);
+            if (i < cleaned.length() - 1) System.out.print("|");
+        }
+        System.out.println("]");
+
+        System.out.print("  │ Chars   : [");
+        for (int i = 0; i < cleaned.length(); i++) {
+            System.out.print(cleaned.charAt(i));
+            if (i < cleaned.length() - 1) System.out.print("|");
+        }
+        System.out.println("]");
+        System.out.println("  │");
+
+        // Run two-pointer and show comparison pairs
+        int left  = 0;
+        int right = cleaned.length() - 1;
+        boolean palindrome = true;
+
+        System.out.println("  │ Two-Pointer Trace:");
+        while (left < right) {
+            char l = cleaned.charAt(left);
+            char r = cleaned.charAt(right);
+            boolean match = (l == r);
+            System.out.printf("  │   [%d]'%c'  ←→  [%d]'%c'  %s%n",
+                    left, l, right, r,
+                    match ? "✓" : "✗ MISMATCH");
+            if (!match) { palindrome = false; break; }
+            left++;
+            right--;
         }
 
-        // ---------------------------------------------------
-        // BASE CONDITION 2: Characters do NOT match
-        //
-        // If outermost characters differ → not a palindrome.
-        // Return false immediately (no deeper recursion needed).
-        // ---------------------------------------------------
-        if (str.charAt(start) != str.charAt(end)) {
-            System.out.println("  [Mismatch] '" + str.charAt(start) +
-                    "' != '" + str.charAt(end) +
-                    "' at start(" + start + ") end(" + end +
-                    ") → return false  ← UNWIND begins");
-            return false;
-        }
-
-        // ---------------------------------------------------
-        // RECURSIVE CASE:
-        //
-        // Outer characters match → recurse inward.
-        // Reduce the problem: move start right, end left.
-        // The result of the inner call determines the result
-        // of this call (true only if ALL inner calls return true).
-        // ---------------------------------------------------
-        System.out.println("  [Recurse] '" + str.charAt(start) +
-                "' == '" + str.charAt(end) +
-                "' at indices [" + start + "] & [" + end +
-                "] → call isPalindrome(str, " + (start + 1) +
-                ", " + (end - 1) + ")");
-
-        return isPalindrome(str, start + 1, end - 1);
+        System.out.println("  │");
+        System.out.println("  │ Result  : \"" + raw + "\"");
+        System.out.println("  │          → " + (palindrome
+                ? "✓ IS a Palindrome"
+                : "✗ is NOT a Palindrome"));
+        System.out.println("  └─────────────────────────────────────────────────┘");
+        System.out.println();
     }
     public static void main(String[] args) {
 
-        // -------------------------------------------------------
-        // Step 1: Declare hardcoded String
-        // -------------------------------------------------------
-        String original = "racecar";
-
         System.out.println("=====================================================");
-        System.out.println("   Palindrome Checker Management System - UC9");
-        System.out.println("   Method: Recursion + Call Stack");
+        System.out.println("   Palindrome Checker Management System - UC10");
+        System.out.println("   Method: String Preprocessing + Regex Normalization");
         System.out.println("=====================================================");
         System.out.println();
-        System.out.println("Input String : \"" + original + "\"");
-        System.out.println("Length       : " + original.length());
-        System.out.println("Indices      : 0 to " + (original.length() - 1));
+
+        // -------------------------------------------------------
+        // Preprocessing Pipeline Reference
+        // -------------------------------------------------------
+        System.out.println("--- Preprocessing Pipeline ---");
+        System.out.println();
+        System.out.printf("  %-6s | %-25s | %-30s | %s%n",
+                "Step", "Operation", "Method", "Effect");
+        System.out.println("  -------|---------------------------|--------------------------------|---------------------------");
+        System.out.printf("  %-6s | %-25s | %-30s | %s%n",
+                "1", "Case Normalization",
+                "String.toLowerCase()",
+                "\"RaCeCaR\" → \"racecar\"");
+        System.out.printf("  %-6s | %-25s | %-30s | %s%n",
+                "2", "Strip Non-Alphanumeric",
+                "replaceAll(\"[^a-z0-9]\", \"\")",
+                "\"a man\" → \"aman\"");
+        System.out.printf("  %-6s | %-25s | %-30s | %s%n",
+                "3", "Palindrome Check",
+                "Two-Pointer (char comparison)",
+                "Compare from both ends inward");
         System.out.println();
 
         // -------------------------------------------------------
-        // Step 2: Display character index map for reference
+        // Regular Expression Breakdown
         // -------------------------------------------------------
-        System.out.println("--- Character Index Map ---");
-        System.out.print("  Char  : ");
-        for (int i = 0; i < original.length(); i++) {
-            System.out.printf("  %c  ", original.charAt(i));
-        }
+        System.out.println("--- Regular Expression Breakdown: [^a-z0-9] ---");
         System.out.println();
-        System.out.print("  Index : ");
-        for (int i = 0; i < original.length(); i++) {
-            System.out.printf("  %d  ", i);
-        }
+        System.out.printf("  %-12s | %s%n", "Token", "Meaning");
+        System.out.println("  -------------|-----------------------------------------------");
+        System.out.printf("  %-12s | %s%n", "[ ]",    "Character class — match one character from this set");
+        System.out.printf("  %-12s | %s%n", "^",      "Inside [ ]: negation — match anything NOT in the set");
+        System.out.printf("  %-12s | %s%n", "a-z",    "Range: any lowercase letter from a to z");
+        System.out.printf("  %-12s | %s%n", "0-9",    "Range: any digit from 0 to 9");
+        System.out.printf("  %-12s | %s%n", "Together","Match any character that is NOT a letter or digit");
+        System.out.printf("  %-12s | %s%n", "Action", "replaceAll removes every matched character");
         System.out.println();
-        System.out.println();
-
-        // -------------------------------------------------------
-        // Step 3: Initiate recursive palindrome check
-        //
-        // First call: start = 0 (first index), end = length - 1 (last index)
-        // Each subsequent call moves start forward and end backward.
-        // -------------------------------------------------------
-        System.out.println("--- Recursive Call Stack Trace ---");
-        System.out.println();
-        System.out.println("  DESCENDING (building the call stack):");
-        System.out.println();
-
-        boolean result = isPalindrome(original, 0, original.length() - 1);
 
         // -------------------------------------------------------
-        // Step 4: Visualise full Call Stack structure
+        // Test Suite: varied inputs
         // -------------------------------------------------------
-        System.out.println();
-        System.out.println("--- Call Stack Structure Visualised ---");
-        System.out.println();
-        System.out.println("  Each row = one stack frame pushed into memory");
-        System.out.println("  Frames unwind (pop) bottom-to-top after base condition");
+        System.out.println("--- Test Suite ---");
         System.out.println();
 
-        int frameWidth = 45;
-        String separator = "  +" + "-".repeat(frameWidth) + "+";
+        // Test Case 1: Classic single word — all lowercase
+        checkAndDisplay("madam");
 
-        // Build and print call stack frames (top = deepest/base, bottom = first call)
-        String[] frames = new String[original.length() / 2 + 2];
-        int frameCount = 0;
+        // Test Case 2: Mixed case — requires toLowerCase()
+        checkAndDisplay("RaceCar");
 
-        // Base frame
-        int mid = original.length() / 2;
-        if (original.length() % 2 == 1) {
-            frames[frameCount++] = String.format(" BASE: isPalindrome(str, %d, %d) → start>=end → true", mid, mid);
-        } else {
-            frames[frameCount++] = String.format(" BASE: isPalindrome(str, %d, %d) → start>=end → true", mid, mid);
-        }
+        // Test Case 3: Phrase with spaces — requires both steps
+        checkAndDisplay("A man a plan a canal Panama");
 
-        // Recursive frames (inner to outer)
-        for (int i = mid - 1; i >= 0; i--) {
-            int j = original.length() - 1 - i;
-            frames[frameCount++] = String.format(" CALL: isPalindrome(str, %d, %d) '%c'=='%c' → recurse inward",
-                    i, j,
-                    original.charAt(i),
-                    original.charAt(j));
-        }
+        // Test Case 4: Phrase with punctuation
+        checkAndDisplay("Was it a car or a cat I saw?");
 
-        // Print top-to-bottom (top = innermost = base)
-        System.out.println("  TOP (most recent frame — base condition)");
-        System.out.println(separator);
-        for (int i = 0; i < frameCount; i++) {
-            System.out.printf("  |%-" + frameWidth + "s|%n", frames[i]);
-            System.out.println(separator);
-        }
-        System.out.println("  BOTTOM (first call from main)");
+        // Test Case 5: Non-palindrome with spaces
+        checkAndDisplay("Hello World");
+
+        // Test Case 6: Numbers
+        checkAndDisplay("12321");
 
         // -------------------------------------------------------
-        // Step 5: Display final result
+        // Summary
         // -------------------------------------------------------
-        System.out.println();
-        System.out.println("--- Result ---");
-        if (result) {
-            System.out.println("Result: \"" + original + "\" IS a Palindrome.");
-            System.out.println("  → All recursive character comparisons returned true.");
-            System.out.println("  → Call stack unwound fully with no mismatches.");
-        } else {
-            System.out.println("Result: \"" + original + "\" is NOT a Palindrome.");
-            System.out.println("  → A mismatch triggered false to propagate up the call stack.");
-        }
-
-        // -------------------------------------------------------
-        // Step 6: Key Concept Summary
-        // -------------------------------------------------------
-        System.out.println();
         System.out.println("--- Key Concept Summary ---");
         System.out.println();
-        System.out.printf("  %-22s | %s%n", "Concept", "Explanation");
-        System.out.println("  -----------------------|-----------------------------------------------");
-        System.out.printf("  %-22s | %s%n", "Recursion",
-                "Method calls itself with smaller start/end range");
-        System.out.printf("  %-22s | %s%n", "Base Condition 1",
-                "start >= end → all pairs checked → return true");
-        System.out.printf("  %-22s | %s%n", "Base Condition 2",
-                "char mismatch → return false immediately");
-        System.out.printf("  %-22s | %s%n", "Recursive Case",
-                "chars match → isPalindrome(str, start+1, end-1)");
-        System.out.printf("  %-22s | %s%n", "Call Stack",
-                "Each call pushes a new frame; base pops them all");
-        System.out.printf("  %-22s | %s%n", "Stack Depth",
-                "n/2 frames maximum (one per character pair)");
-        System.out.printf("  %-22s | %s%n", "Time Complexity",
-                "O(n) — n/2 comparisons");
-        System.out.printf("  %-22s | %s%n", "Space Complexity",
-                "O(n) — n/2 stack frames held in memory");
-        System.out.println();
-        System.out.println("  Important: No loops, no arrays, no extra data structures.");
-        System.out.println("  The call stack itself IS the data structure.");
+        System.out.printf("  %-26s | %s%n", "Concept", "Detail");
+        System.out.println("  ---------------------------|------------------------------------------------");
+        System.out.printf("  %-26s | %s%n", "String Preprocessing",
+                "Transforms raw input into a normalized comparable form");
+        System.out.printf("  %-26s | %s%n", "toLowerCase()",
+                "Case-insensitive comparison; returns new String (immutable)");
+        System.out.printf("  %-26s | %s%n", "replaceAll(regex, \"\")",
+                "Regex engine removes all characters not in [a-z0-9]");
+        System.out.printf("  %-26s | %s%n", "Regular Expression [^a-z0-9]",
+                "Negated character class matching spaces, punctuation, symbols");
+        System.out.printf("  %-26s | %s%n", "Two-Pointer (post-clean)",
+                "Efficient O(n) palindrome check on the cleaned string");
+        System.out.printf("  %-26s | %s%n", "String Immutability",
+                "Each preprocessing step creates a new String object");
+        System.out.printf("  %-26s | %s%n", "Time Complexity",
+                "O(n) preprocessing + O(n) check = O(n) total");
+        System.out.printf("  %-26s | %s%n", "Space Complexity",
+                "O(n) — cleaned string stored as a new String object");
         System.out.println();
         System.out.println("=====================================================");
         System.out.println("   Program exits successfully.");
