@@ -1,195 +1,308 @@
+class PalindromeResult {
 
-public class PalindromeCheckerApp {
-    static String normalize(String raw) {
-        return raw.toLowerCase()            // Step 1: Case normalization
-                .replaceAll("[^a-z0-9]", ""); // Step 2: Strip non-alphanumeric
+    // -------------------------------------------------------
+    // Private fields — Encapsulation
+    // These cannot be accessed directly from outside the class.
+    // External code must use the provided getter methods.
+    // -------------------------------------------------------
+    private final String rawInput;       // Original uncleaned input
+    private final String cleanedInput;   // Normalized/preprocessed input
+    private final boolean isPalindrome;  // Result of palindrome check
+    private final String strategy;       // Strategy used for checking
+
+
+    PalindromeResult(String rawInput, String cleanedInput,
+                     boolean isPalindrome, String strategy) {
+        this.rawInput      = rawInput;
+        this.cleanedInput  = cleanedInput;
+        this.isPalindrome  = isPalindrome;
+        this.strategy      = strategy;
     }
 
-    static boolean isPalindrome(String cleaned) {
-        int left  = 0;
-        int right = cleaned.length() - 1;
+    // -------------------------------------------------------
+    // Public Getter Methods — Controlled Access (Encapsulation)
+    // These are the ONLY way to read the private field values.
+    // No setters are provided — the result is immutable.
+    // -------------------------------------------------------
 
+    /** @return the original raw input string */
+    public String getRawInput()      { return rawInput; }
+
+    /** @return the normalized/cleaned input string */
+    public String getCleanedInput()  { return cleanedInput; }
+
+    /** @return true if the input is a palindrome */
+    public boolean isPalindrome()    { return isPalindrome; }
+
+    /** @return the name of the strategy used */
+    public String getStrategy()      { return strategy; }
+
+
+    @Override
+    public String toString() {
+        return String.format(
+                "  Raw Input    : \"%s\"%n" +
+                        "  Cleaned      : \"%s\"%n" +
+                        "  Strategy     : %s%n" +
+                        "  Is Palindrome: %s",
+                rawInput, cleanedInput, strategy,
+                isPalindrome ? "✓ YES" : "✗ NO"
+        );
+    }
+}
+
+
+
+class PalindromeChecker {
+
+    // -------------------------------------------------------
+    // Private field — tracks how many checks have been run.
+    // Demonstrates encapsulated state within the service.
+    // -------------------------------------------------------
+    private int checkCount;
+
+
+    PalindromeChecker() {
+        this.checkCount = 0;
+    }
+
+    // -------------------------------------------------------
+    // Public API Method: checkPalindrome(String)
+    //
+    // Primary entry point for palindrome validation.
+    // Orchestrates: normalize → check → package result.
+    //
+    // The caller only needs to pass a raw string.
+    // All internal complexity is hidden (Abstraction).
+    //
+    // Uses the Two-Pointer strategy internally.
+    // -------------------------------------------------------
+     PalindromeResult checkPalindrome(String raw) {
+        checkCount++;
+        String cleaned = normalize(raw);
+        boolean result = twoPointerCheck(cleaned);
+        return new PalindromeResult(raw, cleaned, result, "Two-Pointer");
+    }
+
+    // -------------------------------------------------------
+    // Overloaded Method: checkPalindrome(String, String)
+    //
+    // Method Overloading — same method name, different params.
+    // Allows the caller to specify which strategy to use.
+    //
+    // Supported strategies:
+    //   "twopointer" → Two-pointer char comparison (default)
+    //   "stack"      → Stack-based reversal (LIFO)
+    //   "recursive"  → Recursive start/end comparison
+    // -------------------------------------------------------
+
+    public PalindromeResult checkPalindrome(String raw, String strategy) {
+        checkCount++;
+        String cleaned = normalize(raw);
+        boolean result = false;           // Default value; overwritten by switch
+        String strategyLabel = "Two-Pointer"; // Default; overwritten by switch
+
+        switch (strategy.toLowerCase()) {
+            case "stack":
+                result = stackCheck(cleaned);
+                strategyLabel = "Stack (LIFO)";
+                break;
+            case "recursive":
+                result = recursiveCheck(cleaned, 0, cleaned.length() - 1);
+                strategyLabel = "Recursive";
+                break;
+            default:
+                result = twoPointerCheck(cleaned);
+                strategyLabel = "Two-Pointer";
+        }
+
+        return new PalindromeResult(raw, cleaned, result, strategyLabel);
+    }
+
+    // -------------------------------------------------------
+    // Public Getter: getCheckCount()
+    // Provides READ-ONLY access to the private checkCount field.
+    // -------------------------------------------------------
+    /**
+     * Returns the total number of palindrome checks performed.
+     * @return check count
+     */
+    public int getCheckCount() { return checkCount; }
+
+    // =====================================================
+    // PRIVATE METHODS — Internal Implementation Details
+    // These are hidden from the outside world (Encapsulation).
+    // Callers interact only with the public checkPalindrome() API.
+    // =====================================================
+
+    // -------------------------------------------------------
+    // Private Method: normalize(String)
+    //
+    // Preprocessing pipeline (from UC10):
+    //   Step 1: toLowerCase() — remove case differences
+    //   Step 2: replaceAll([^a-z0-9], "") — strip non-alphanumeric
+    // -------------------------------------------------------
+    private String normalize(String raw) {
+        return raw.toLowerCase().replaceAll("[^a-z0-9]", "");
+    }
+
+    // -------------------------------------------------------
+    // Private Method: twoPointerCheck(String)
+    //
+    // Two-pointer technique (from UC4):
+    // Compare characters from both ends moving inward.
+    // -------------------------------------------------------
+    private boolean twoPointerCheck(String s) {
+        int left  = 0;
+        int right = s.length() - 1;
         while (left < right) {
-            if (cleaned.charAt(left) != cleaned.charAt(right)) {
-                return false;
-            }
+            if (s.charAt(left) != s.charAt(right)) return false;
             left++;
             right--;
         }
         return true;
     }
 
-    static void checkAndDisplay(String raw) {
-        System.out.println("  ┌─────────────────────────────────────────────────┐");
-        System.out.println("  │ Input   : \"" + raw + "\"");
+    // -------------------------------------------------------
+    // Private Method: stackCheck(String)
+    //
+    // Stack-based reversal (from UC5):
+    // Push all chars, pop to reverse, compare with original.
+    // -------------------------------------------------------
+    private boolean stackCheck(String s) {
+        java.util.Stack<Character> stack = new java.util.Stack<>();
+        for (char c : s.toCharArray()) stack.push(c);
 
-        // -------------------------------------------------------
-        // Preprocessing Step 1: toLowerCase()
-        //
-        // Java's String.toLowerCase() converts every uppercase
-        // character to its lowercase equivalent using Unicode rules.
-        // A new String object is returned (String is immutable).
-        //
-        // Example: "A Man A Plan" → "a man a plan"
-        // -------------------------------------------------------
-        String lowered = raw.toLowerCase();
-        System.out.println("  │ Step 1  : toLowerCase()         → \"" + lowered + "\"");
+        StringBuilder reversed = new StringBuilder();
+        while (!stack.isEmpty()) reversed.append(stack.pop());
 
-        // -------------------------------------------------------
-        // Preprocessing Step 2: replaceAll(regex, replacement)
-        //
-        // Regular Expression: [^a-z0-9]
-        //   [ ]     → character class (match one of these)
-        //   ^       → negation inside [ ] (NOT any of these)
-        //   a-z     → any lowercase letter (a,b,c,...z)
-        //   0-9     → any digit (0,1,2,...9)
-        //   Result  → matches any char that is NOT a letter/digit
-        //
-        // replaceAll replaces EVERY match with "" (removes them).
-        // Java's regex engine scans the entire string in O(n).
-        //
-        // Example: "a man a plan" → "amanaplan"
-        // -------------------------------------------------------
-        String cleaned = lowered.replaceAll("[^a-z0-9]", "");
-        System.out.println("  │ Step 2  : replaceAll([^a-z0-9]) → \"" + cleaned + "\"");
-        System.out.println("  │");
-
-        // -------------------------------------------------------
-        // Two-Pointer Comparison Trace
-        // -------------------------------------------------------
-        System.out.print("  │ Indices : [");
-        for (int i = 0; i < cleaned.length(); i++) {
-            System.out.print(i);
-            if (i < cleaned.length() - 1) System.out.print("|");
-        }
-        System.out.println("]");
-
-        System.out.print("  │ Chars   : [");
-        for (int i = 0; i < cleaned.length(); i++) {
-            System.out.print(cleaned.charAt(i));
-            if (i < cleaned.length() - 1) System.out.print("|");
-        }
-        System.out.println("]");
-        System.out.println("  │");
-
-        // Run two-pointer and show comparison pairs
-        int left  = 0;
-        int right = cleaned.length() - 1;
-        boolean palindrome = true;
-
-        System.out.println("  │ Two-Pointer Trace:");
-        while (left < right) {
-            char l = cleaned.charAt(left);
-            char r = cleaned.charAt(right);
-            boolean match = (l == r);
-            System.out.printf("  │   [%d]'%c'  ←→  [%d]'%c'  %s%n",
-                    left, l, right, r,
-                    match ? "✓" : "✗ MISMATCH");
-            if (!match) { palindrome = false; break; }
-            left++;
-            right--;
-        }
-
-        System.out.println("  │");
-        System.out.println("  │ Result  : \"" + raw + "\"");
-        System.out.println("  │          → " + (palindrome
-                ? "✓ IS a Palindrome"
-                : "✗ is NOT a Palindrome"));
-        System.out.println("  └─────────────────────────────────────────────────┘");
-        System.out.println();
+        return s.equals(reversed.toString());
     }
+
+    // -------------------------------------------------------
+    // Private Method: recursiveCheck(String, int, int)
+    //
+    // Recursive comparison (from UC9):
+    // Base condition: start >= end → true
+    // Recursive case: compare ends, recurse inward.
+    // -------------------------------------------------------
+    private boolean recursiveCheck(String s, int start, int end) {
+        if (start >= end) return true;
+        if (s.charAt(start) != s.charAt(end)) return false;
+        return recursiveCheck(s, start + 1, end - 1);
+    }
+}
+
+
+public class PalindromeCheckerApp {
+
     public static void main(String[] args) {
 
         System.out.println("=====================================================");
-        System.out.println("   Palindrome Checker Management System - UC10");
-        System.out.println("   Method: String Preprocessing + Regex Normalization");
+        System.out.println("   Palindrome Checker Management System - UC11");
+        System.out.println("   Method: Object-Oriented Palindrome Service");
         System.out.println("=====================================================");
         System.out.println();
 
         // -------------------------------------------------------
-        // Preprocessing Pipeline Reference
+        // OOP in Action: Instantiate the Service Class
+        //
+        // An OBJECT of PalindromeChecker is created.
+        // The caller does not know about private normalize(),
+        // twoPointerCheck(), stackCheck(), or recursiveCheck().
+        // This is Abstraction + Encapsulation working together.
         // -------------------------------------------------------
-        System.out.println("--- Preprocessing Pipeline ---");
+        System.out.println("--- OOP Class Structure ---");
         System.out.println();
-        System.out.printf("  %-6s | %-25s | %-30s | %s%n",
-                "Step", "Operation", "Method", "Effect");
-        System.out.println("  -------|---------------------------|--------------------------------|---------------------------");
-        System.out.printf("  %-6s | %-25s | %-30s | %s%n",
-                "1", "Case Normalization",
-                "String.toLowerCase()",
-                "\"RaCeCaR\" → \"racecar\"");
-        System.out.printf("  %-6s | %-25s | %-30s | %s%n",
-                "2", "Strip Non-Alphanumeric",
-                "replaceAll(\"[^a-z0-9]\", \"\")",
-                "\"a man\" → \"aman\"");
-        System.out.printf("  %-6s | %-25s | %-30s | %s%n",
-                "3", "Palindrome Check",
-                "Two-Pointer (char comparison)",
-                "Compare from both ends inward");
+        System.out.printf("  %-30s | %s%n", "Class", "Responsibility (SRP)");
+        System.out.println("  -------------------------------|-------------------------------------------");
+        System.out.printf("  %-30s | %s%n", "PalindromeResult",
+                "Stores and exposes check outcome data");
+        System.out.printf("  %-30s | %s%n", "PalindromeChecker",
+                "Performs normalization and palindrome check");
+        System.out.printf("  %-30s | %s%n", "UseCase11PalindromeCheckerApp",
+                "Entry point; client of the service");
         System.out.println();
 
+        // Instantiate the service — client creates ONE checker object
+        PalindromeChecker checker = new PalindromeChecker();
+
         // -------------------------------------------------------
-        // Regular Expression Breakdown
+        // Demo 1: Default strategy (Two-Pointer) via overload 1
+        // checkPalindrome(String)
         // -------------------------------------------------------
-        System.out.println("--- Regular Expression Breakdown: [^a-z0-9] ---");
-        System.out.println();
-        System.out.printf("  %-12s | %s%n", "Token", "Meaning");
-        System.out.println("  -------------|-----------------------------------------------");
-        System.out.printf("  %-12s | %s%n", "[ ]",    "Character class — match one character from this set");
-        System.out.printf("  %-12s | %s%n", "^",      "Inside [ ]: negation — match anything NOT in the set");
-        System.out.printf("  %-12s | %s%n", "a-z",    "Range: any lowercase letter from a to z");
-        System.out.printf("  %-12s | %s%n", "0-9",    "Range: any digit from 0 to 9");
-        System.out.printf("  %-12s | %s%n", "Together","Match any character that is NOT a letter or digit");
-        System.out.printf("  %-12s | %s%n", "Action", "replaceAll removes every matched character");
+        System.out.println("--- Demo 1: Default Strategy (Two-Pointer) ---");
         System.out.println();
 
+        String[] testInputs = {
+                "madam",
+                "RaceCar",
+                "A man a plan a canal Panama",
+                "Was it a car or a cat I saw?",
+                "Hello World",
+                "12321"
+        };
+
+        for (String input : testInputs) {
+            PalindromeResult result = checker.checkPalindrome(input);
+            System.out.println(result.toString());
+            System.out.println();
+        }
+
         // -------------------------------------------------------
-        // Test Suite: varied inputs
+        // Demo 2: Explicit strategy selection via overload 2
+        // checkPalindrome(String, String)
+        // Demonstrates Method Overloading — same method name,
+        // different parameter lists, different behaviour.
         // -------------------------------------------------------
-        System.out.println("--- Test Suite ---");
+        System.out.println("--- Demo 2: Strategy Selection (Method Overloading) ---");
         System.out.println();
 
-        // Test Case 1: Classic single word — all lowercase
-        checkAndDisplay("madam");
+        String phrase = "Never odd or even";
 
-        // Test Case 2: Mixed case — requires toLowerCase()
-        checkAndDisplay("RaceCar");
-
-        // Test Case 3: Phrase with spaces — requires both steps
-        checkAndDisplay("A man a plan a canal Panama");
-
-        // Test Case 4: Phrase with punctuation
-        checkAndDisplay("Was it a car or a cat I saw?");
-
-        // Test Case 5: Non-palindrome with spaces
-        checkAndDisplay("Hello World");
-
-        // Test Case 6: Numbers
-        checkAndDisplay("12321");
-
-        // -------------------------------------------------------
-        // Summary
-        // -------------------------------------------------------
-        System.out.println("--- Key Concept Summary ---");
+        System.out.println("  Testing: \"" + phrase + "\" with all strategies:");
         System.out.println();
-        System.out.printf("  %-26s | %s%n", "Concept", "Detail");
-        System.out.println("  ---------------------------|------------------------------------------------");
-        System.out.printf("  %-26s | %s%n", "String Preprocessing",
-                "Transforms raw input into a normalized comparable form");
-        System.out.printf("  %-26s | %s%n", "toLowerCase()",
-                "Case-insensitive comparison; returns new String (immutable)");
-        System.out.printf("  %-26s | %s%n", "replaceAll(regex, \"\")",
-                "Regex engine removes all characters not in [a-z0-9]");
-        System.out.printf("  %-26s | %s%n", "Regular Expression [^a-z0-9]",
-                "Negated character class matching spaces, punctuation, symbols");
-        System.out.printf("  %-26s | %s%n", "Two-Pointer (post-clean)",
-                "Efficient O(n) palindrome check on the cleaned string");
-        System.out.printf("  %-26s | %s%n", "String Immutability",
-                "Each preprocessing step creates a new String object");
-        System.out.printf("  %-26s | %s%n", "Time Complexity",
-                "O(n) preprocessing + O(n) check = O(n) total");
-        System.out.printf("  %-26s | %s%n", "Space Complexity",
-                "O(n) — cleaned string stored as a new String object");
+
+        String[] strategies = {"twopointer", "stack", "recursive"};
+        for (String strat : strategies) {
+            PalindromeResult r = checker.checkPalindrome(phrase, strat);
+            System.out.printf("  %-16s → cleaned: \"%-20s\" → %s%n",
+                    r.getStrategy(),
+                    r.getCleanedInput(),
+                    r.isPalindrome() ? "✓ IS a Palindrome" : "✗ NOT a Palindrome");
+        }
+
+        // -------------------------------------------------------
+        // Demo 3: Encapsulated state — check count
+        // -------------------------------------------------------
+        System.out.println();
+        System.out.println("--- Demo 3: Encapsulated State ---");
+        System.out.println();
+        System.out.println("  checker.getCheckCount() = " + checker.getCheckCount());
+        System.out.println("  (Private field 'checkCount' accessed via public getter only)");
+
+        // -------------------------------------------------------
+        // OOP Concept Summary
+        // -------------------------------------------------------
+        System.out.println();
+        System.out.println("--- OOP Concept Summary ---");
+        System.out.println();
+        System.out.printf("  %-28s | %s%n", "Concept", "Where Applied");
+        System.out.println("  -----------------------------|------------------------------------------------");
+        System.out.printf("  %-28s | %s%n", "Encapsulation",
+                "private fields + public getters in both classes");
+        System.out.printf("  %-28s | %s%n", "Single Responsibility",
+                "Each class has exactly one clearly defined job");
+        System.out.printf("  %-28s | %s%n", "Abstraction",
+                "Caller uses checkPalindrome(); internals are hidden");
+        System.out.printf("  %-28s | %s%n", "Method Overloading",
+                "checkPalindrome(String) vs checkPalindrome(String, String)");
+        System.out.printf("  %-28s | %s%n", "Access Modifiers",
+                "private: fields & helpers | public: API methods");
+        System.out.printf("  %-28s | %s%n", "Object Instantiation",
+                "new PalindromeChecker() creates service object");
+        System.out.printf("  %-28s | %s%n", "toString() Override",
+                "PalindromeResult.toString() for readable output");
         System.out.println();
         System.out.println("=====================================================");
         System.out.println("   Program exits successfully.");
